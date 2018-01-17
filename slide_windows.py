@@ -70,10 +70,18 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     """
     # Make a copy of the image
     imcopy = np.copy(img)
+    # Colours for bounding boxes
+    colours = [
+        (255,0,0), (0,127,127), (0,255,0), (127,0,127), (0,0,255), (127,127,0), (0,0,0), (127,127,127), (255,255,255)]
+    colour_idx = 0
     # Iterate through the bounding boxes
     for bbox in bboxes:
         # Draw a rectangle given bbox coordinates
-        cv2.rectangle(imcopy, bbox[0], bbox[1], color, thick)
+        cv2.rectangle(imcopy, (bbox[0][0]+(thick-1)//2, bbox[0][1]+(thick-1)//2), (bbox[1][0]-(thick-1)//2, bbox[1][1]-(thick-1)//2),
+                      color=colours[colour_idx], thickness=thick)
+        colour_idx += 1
+        if colour_idx == len(colours):
+            colour_idx = 0
     # Return the image copy with boxes drawn
     return imcopy
 
@@ -89,7 +97,7 @@ if __name__ == "__main__":
     plt.imshow(window_img1)
 
     image2 = imread('test_images/test1.jpg')
-    windows2 = slide_window(image2, x_start_stop=(280, 1048), y_start_stop=(400, 592),
+    windows2 = slide_window(image2, x_start_stop=(280, 1144), y_start_stop=(390, 582),
                             xy_window=(96, 96), xy_overlap=(0.5, 0.5))
 
     window_img2 = draw_boxes(image2, windows2, color=(0, 0, 255), thick=6)
@@ -98,12 +106,30 @@ if __name__ == "__main__":
     plt.imshow(window_img2)
 
     image3 = imread('test_images/test5.jpg')
-    windows3 = slide_window(image2, x_start_stop=(256, 1280), y_start_stop=(428, 620),
+    windows3 = slide_window(image3, x_start_stop=(256, 1280), y_start_stop=(410, 602),
                             xy_window=(128, 128), xy_overlap=(0.5, 0.5))
 
     window_img3 = draw_boxes(image3, windows3, color=(0, 0, 255), thick=6)
 
     plt.figure()
     plt.imshow(window_img3)
+
+    image4 = imread('test_images/test5.jpg')
+    windows4 = slide_window(image4, x_start_stop=(944, 1280), y_start_stop=(380, 620),
+                            xy_window=(192, 160), xy_overlap=(0.75, 0.75))
+
+    window_img4 = draw_boxes(image4, windows4, color=(0, 0, 255), thick=6)
+
+    plt.figure()
+    plt.imshow(window_img4)
+
+    image5 = imread('test_images/close_car.jpg')
+    windows5 = slide_window(image5, x_start_stop=(896, 1280), y_start_stop=(396, 636),
+                            xy_window=(256, 192), xy_overlap=(0.75, 0.75))
+
+    window_img5 = draw_boxes(image5, windows5, color=(0, 0, 255), thick=6)
+
+    plt.figure()
+    plt.imshow(window_img5)
 
     plt.show(block=True)

@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 
 from calculate_features import extract_hog_features, HogParameters
-from load_samples import get_non_vehicle_data, get_kitti_car_images
+from load_samples import get_non_vehicle_data, get_vehicle_data
 
 
 def train_svm(train_features, train_labels, test_features, test_labels):
@@ -61,8 +61,7 @@ def prepare_hog_data(colour_space='HSV', orientations=18, pix_per_cell=8, cell_p
     :param hog_channel: Can be 0, 1, 2, or "ALL"
     :return:
     """
-    kitti = get_kitti_car_images()
-    vehicles = kitti
+    vehicles = get_vehicle_data()
     shuffle(vehicles)
     non_vehicles = get_non_vehicle_data()
     shuffle(non_vehicles)

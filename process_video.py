@@ -16,4 +16,6 @@ def process_video(input_file, output_file):
 
 
 if __name__ == "__main__":
+    # clip = VideoFileClip("project_video.mp4")
+    # clip.save_frame("test_images/close_car.jpg", t=29)
     process_video(input_file="project_video.mp4", output_file="project_output.mp4")

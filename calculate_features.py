@@ -5,7 +5,7 @@ from matplotlib.image import imread
 
 
 class HogParameters:
-    def __init__(self, orientations, pixels_per_cell, cells_per_block)
+    def __init__(self, orientations, pixels_per_cell, cells_per_block):
         self.orientations = orientations
         self.pixels_per_cell = pixels_per_cell
         self.cells_per_block = cells_per_block
@@ -35,10 +35,10 @@ def color_hist(img, nbins=32, bins_range=(0, 1)):
 def bin_spatial(img, color_space='RGB', size=(32, 32)):
     """
     Compute color histogram features
-    :param img:
-    :param color_space:
-    :param size:
-    :return:
+    :param img: The image to compute the color histogram features of
+    :param color_space: The chosen color space
+    :param size: The size to which the image will be resized to construct a color histogram
+    :return: A list of spatial color features
     """
     # Convert image to new color space (if specified)
     if color_space != 'RGB':
@@ -67,17 +67,19 @@ def get_hog_features(
         feature_vec=True):
     """
     Calculate HOG features
-    :param img:
-    :param hog_parameters:
-    :param vis:
-    :param feature_vec:
-    :return:
+    :param img: The image to apply HOG feature extraction on
+    :param hog_parameters: HogParameters instance
+    :param vis: Visualize the HOG gradients or not
+    :param feature_vec: Return the features as a 1D vector or not
+    :return: All the hog features. If vis is True, then the second (optional) return value is an image with the HOG
+             gradients visualized
     """
     if vis:
         features, hog_image = hog(img,
                                   orientations=hog_parameters.orientations,
                                   pixels_per_cell=(hog_parameters.pixels_per_cell, hog_parameters.pixels_per_cell),
                                   cells_per_block=(hog_parameters.cells_per_block, hog_parameters.cells_per_block),
+                                  block_norm="L2-Hys",
                                   transform_sqrt=False,
                                   visualise=True,
                                   feature_vector=False)
@@ -87,6 +89,7 @@ def get_hog_features(
                        orientations=hog_parameters.orientations,
                        pixels_per_cell=(hog_parameters.pixels_per_cell, hog_parameters.pixels_per_cell),
                        cells_per_block=(hog_parameters.cells_per_block, hog_parameters.cells_per_block),
+                       block_norm="L2-Hys",
                        transform_sqrt=False,
                        visualise=False,
                        feature_vector=feature_vec)
@@ -238,20 +241,80 @@ if __name__ == "__main__":
     plt.title('Spatially Binned Features')
 
     # HOG
-    gray_img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    orient = 9
-    pix_per_cell = 8
-    cell_per_block = 2
-    features, hog_image = get_hog_features(
-        gray_img,
-        hog_parameters=HogParameters(orientations=orient, pixels_per_cell=8, cells_per_block=cell_per_block),
+    hsv_img = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    features, hog_image1 = get_hog_features(
+        hsv_img[:, :, 0],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
         vis=True,
         feature_vec=True)
-    fig,axes = plt.subplots(1,2)
-    axes[0].imshow(image, cmap='gray')
-    axes[0].set_title('Example Car Image')
-    axes[1].imshow(hog_image, cmap='gray')
-    axes[1].set_title('HOG Visualization')
+    features, hog_image2 = get_hog_features(
+        hsv_img[:, :, 1],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    features, hog_image3 = get_hog_features(
+        hsv_img[:, :, 2],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    hls_img = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+    features, hog_image4 = get_hog_features(
+        hls_img[:, :, 0],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    features, hog_image5 = get_hog_features(
+        hls_img[:, :, 1],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    features, hog_image6 = get_hog_features(
+        hls_img[:, :, 2],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    lab_img = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
+    features, hog_image7 = get_hog_features(
+        lab_img[:, :, 0],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    features, hog_image8 = get_hog_features(
+        lab_img[:, :, 1],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    features, hog_image9 = get_hog_features(
+        lab_img[:, :, 2],
+        hog_parameters=HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2),
+        vis=True,
+        feature_vec=True)
+    fig,axes = plt.subplots(4,3)
+    for ax in axes.flatten():
+        ax.axis('off')
+    axes[0][0].imshow(image, cmap='gray')
+    axes[0][0].set_title('Example Car Image')
+    axes[1][0].imshow(hog_image1, cmap='gray')
+    axes[1][0].set_title('HOG Visualization H')
+    axes[1][1].imshow(hog_image2, cmap='gray')
+    axes[1][1].set_title('HOG Visualization S')
+    axes[1][2].imshow(hog_image3, cmap='gray')
+    axes[1][2].set_title('HOG Visualization V')
+    axes[2][0].imshow(hog_image4, cmap='gray')
+    axes[2][0].set_title('HOG Visualization H')
+    axes[2][1].imshow(hog_image5, cmap='gray')
+    axes[2][1].set_title('HOG Visualization L')
+    axes[2][2].imshow(hog_image6, cmap='gray')
+    axes[2][2].set_title('HOG Visualization S')
+    axes[3][0].imshow(hog_image7, cmap='gray')
+    axes[3][0].set_title('HOG Visualization L')
+    axes[3][1].imshow(hog_image8, cmap='gray')
+    axes[3][1].set_title('HOG Visualization A')
+    axes[3][2].imshow(hog_image9, cmap='gray')
+    axes[3][2].set_title('HOG Visualization B')
+
+
+
     figManager = plt.get_current_fig_manager()
     figManager.window.showMaximized()
     plt.show(block=True)

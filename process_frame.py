@@ -18,46 +18,79 @@ def process_frame(frame, clf, norm_scaler, hog_parameters):
     bbox_list = []
 
     window_area_def1 = SlidingWindowAreaDefinition(
-        x_start=400,
+        x_start=320,
         x_stop=1024,
-        y_start=380,
-        y_stop=550,
-        scale=1.0
+        y_start=370,
+        y_stop=562,
+        scaleX=1.0,
+        scaleY=1.0
         )
 
     found_cars = find_cars(hsv_frame,
-                           window_area_def1,
-                           clf,
-                           norm_scaler,
-                           hog_parameters)
+                           clf=clf,
+                           X_scaler=norm_scaler,
+                           window_area_def=window_area_def1,
+                           hog_parameters=hog_parameters)
     bbox_list.append(found_cars)
 
     window_area_def2 = SlidingWindowAreaDefinition(
-        x_start=400,
-        x_stop=1024,
-        y_start=400,
-        y_stop=660,
-        scale=1.5
+        x_start=280,
+        x_stop=1144,
+        y_start=390,
+        y_stop=582,
+        scaleX=1.5,
+        scaleY=1.5
         )
     found_cars = find_cars(hsv_frame,
-                           window_area_def2,
-                           clf,
-                           norm_scaler,
-                           hog_parameters)
+                           clf=clf,
+                           X_scaler=norm_scaler,
+                           window_area_def=window_area_def2,
+                           hog_parameters=hog_parameters)
     bbox_list.append(found_cars)
 
     window_area_def3 = SlidingWindowAreaDefinition(
-        x_start=400,
-        x_stop=1024,
-        y_start=400,
-        y_stop=656,
-        scale=2.0
+        x_start=256,
+        x_stop=1280,
+        y_start=410,
+        y_stop=602,
+        scaleX=2.0,
+        scaleY=2.0
         )
     found_cars = find_cars(hsv_frame,
-                           window_area_def3,
-                           clf,
-                           norm_scaler,
-                           hog_parameters)
+                           clf=clf,
+                           X_scaler=norm_scaler,
+                           window_area_def=window_area_def3,
+                           hog_parameters=hog_parameters)
+    bbox_list.append(found_cars)
+
+    window_area_def4 = SlidingWindowAreaDefinition(
+        x_start=944,
+        x_stop=1280,
+        y_start=380,
+        y_stop=620,
+        scaleX=3.0,
+        scaleY=2.5
+        )
+    found_cars = find_cars(hsv_frame,
+                           clf=clf,
+                           X_scaler=norm_scaler,
+                           window_area_def=window_area_def4,
+                           hog_parameters=hog_parameters)
+    bbox_list.append(found_cars)
+
+    window_area_def5 = SlidingWindowAreaDefinition(
+        x_start=896,
+        x_stop=1280,
+        y_start=396,
+        y_stop=636,
+        scaleX=4.0,
+        scaleY=3.0
+        )
+    found_cars = find_cars(hsv_frame,
+                           clf=clf,
+                           X_scaler=norm_scaler,
+                           window_area_def=window_area_def5,
+                           hog_parameters=hog_parameters)
     bbox_list.append(found_cars)
 
     bbox_list = [item for sublist in bbox_list for item in sublist]

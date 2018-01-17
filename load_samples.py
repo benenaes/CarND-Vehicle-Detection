@@ -12,6 +12,13 @@ def get_kitti_car_images():
     return kitti
 
 
+def get_vehicle_data():
+    kitti = get_kitti_car_images()
+    gti = find_unique_gti()
+    vehicles = np.concatenate((kitti, gti))
+    return vehicles
+
+
 def get_non_vehicle_data():
     gti = glob.glob("non-vehicles/GTI/*.png")
     extras = glob.glob("non-vehicles/Extras/*.png")
@@ -20,9 +27,7 @@ def get_non_vehicle_data():
 
 
 if __name__ == "__main__":
-    kitti = get_kitti_car_images()
-    gti = find_unique_gti()
-    vehicles = np.concatenate(kitti, gti)
+    vehicles = get_vehicle_data()
     shuffle(vehicles)
     non_vehicles = get_non_vehicle_data()
     shuffle(non_vehicles)

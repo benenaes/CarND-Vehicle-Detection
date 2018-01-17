@@ -6,12 +6,13 @@ from calculate_features import single_img_features, get_hog_features, HogParamet
 
 
 class SlidingWindowAreaDefinition:
-    def __init__(self, x_start, x_stop, y_start, y_stop, scale):
+    def __init__(self, x_start, x_stop, y_start, y_stop, scaleX, scaleY):
         self.x_start = x_start
         self.x_stop = x_stop
         self.y_start = y_start
         self.y_stop = y_stop
-        self.scale = scale
+        self.scaleX = scaleX
+        self.scaleY = scaleY
 
 
 def search_windows(
@@ -51,15 +52,11 @@ def search_windows(
 
 
 # Define a single function that can extract features using hog sub-sampling and make predictions
-def find_cars(
-        img,
-        window_area_def=SlidingWindowAreaDefinition(0,1280,0,720,1),
-        clf,
-        X_scaler,
-        hog_parameters=HogParameters(18,8,2),
-        # spatial_size,
-        # hist_bins
-        ):
+def find_cars(img,
+              clf,
+              X_scaler,
+              window_area_def=SlidingWindowAreaDefinition(0,1280,0,720,1),
+              hog_parameters=HogParameters(18,8,2)):
     draw_img = np.copy(img)
     # img = img.astype(np.float32) / 255
 
@@ -87,7 +84,7 @@ def find_cars(
         imshape = img_to_search.shape
         img_to_search = cv2.resize(
             img_to_search,
-            (np.int(imshape[1] / window_area_def.scale), np.int(imshape[0] / window_area_def.scale)))
+            (np.int(imshape[1] / window_area_def.scaleX), np.int(imshape[0] / window_area_def.scaleY)))
 
     ch1 = img_to_search[:, :, 0]
     ch2 = img_to_search[:, :, 1]
@@ -96,7 +93,7 @@ def find_cars(
     # Define blocks and steps as above
     nxblocks = (ch1.shape[1] // hog_parameters.pixels_per_cell) - hog_parameters.cells_per_block + 1
     nyblocks = (ch1.shape[0] // hog_parameters.pixels_per_cell) - hog_parameters.cells_per_block + 1
-    nfeat_per_block = hog_parameters.orientations * hog_parameters.cells_per_block ** 2
+    # nfeat_per_block = hog_parameters.orientations * hog_parameters.cells_per_block ** 2
 
     # 64 was the original sampling rate, with 8 cells and 8 pix per cell
     window = 64
@@ -124,7 +121,7 @@ def find_cars(
             ytop = ypos * hog_parameters.pixels_per_cell
 
             # Extract the image patch
-            subimg = cv2.resize(img_to_search[ytop:ytop + window, xleft:xleft + window], (64, 64))
+            # subimg = cv2.resize(img_to_search[ytop:ytop + window, xleft:xleft + window], (64, 64))
 
             # Get color features
             spatial_features = [] # bin_spatial(subimg, size=spatial_size)
@@ -137,13 +134,14 @@ def find_cars(
             test_prediction = clf.predict(test_features)
 
             if test_prediction == 1:
-                xbox_left = np.int(xleft * window_area_def.scale)
-                ytop_draw = np.int(ytop * window_area_def.scale)
-                win_draw = np.int(window * window_area_def.scale)
+                xbox_left = np.int(xleft * window_area_def.scaleX)
+                ytop_draw = np.int(ytop * window_area_def.scaleY)
+                win_draw_x = np.int(window * window_area_def.scaleX)
+                win_draw_y = np.int(window * window_area_def.scaleY)
                 cv2.rectangle(
                     img=draw_img,
                     pt1=(xbox_left + window_area_def.x_start, ytop_draw + window_area_def.y_start),
-                    pt2=(xbox_left + window_area_def.x_start + win_draw, ytop_draw + win_draw + window_area_def.y_start),
+                    pt2=(xbox_left + window_area_def.x_start + win_draw_x, ytop_draw + win_draw_y + window_area_def.y_start),
                     color=(0, 0, 255),
                     thickness=6)
 
@@ -162,9 +160,10 @@ if __name__ == "__main__":
         img = imread(test_file)
         draw_img = find_cars(
             img=img,
-            window_area_def=SlidingWindowAreaDefinition(0,1280,0,720,1),
             clf=clf,
-            X_scaler=hog_scaler, hog_parameters=HogParameters(18,8,2))
+            X_scaler=hog_scaler,
+            hog_parameters=HogParameters(18, 8, 2),
+            window_area_def=SlidingWindowAreaDefinition(0,1280,0,720,1))
         plt.figure()
         plt.imshow(draw_img)
     plt.show(block=True)
