@@ -4,19 +4,12 @@ import matplotlib.pyplot as plt
 from matplotlib.image import imread
 from random import shuffle
 
+from find_unique_gti import find_unique_gti
+
 
 def get_kitti_car_images():
     kitti = glob.glob("vehicles/KITTI_extracted/*.png")
     return kitti
-
-
-def get_gti_car_images():
-    gti_far = glob.glob("vehicles/GTI_Far/*.png")
-    gti_left = glob.glob("vehicles/GTI_Left/*.png")
-    gti_middle = glob.glob("vehicles/GTI_MiddleClose/*.png")
-    gti_right = glob.glob("vehicles/GTI_Right/*.png")
-    total = np.concatenate((gti_far, gti_left, gti_middle, gti_right))
-    return total
 
 
 def get_non_vehicle_data():
@@ -28,7 +21,8 @@ def get_non_vehicle_data():
 
 if __name__ == "__main__":
     kitti = get_kitti_car_images()
-    vehicles = kitti
+    gti = find_unique_gti()
+    vehicles = np.concatenate(kitti, gti)
     shuffle(vehicles)
     non_vehicles = get_non_vehicle_data()
     shuffle(non_vehicles)

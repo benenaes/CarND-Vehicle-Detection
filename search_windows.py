@@ -64,7 +64,7 @@ def find_cars(
     # img = img.astype(np.float32) / 255
 
     img_to_search = img[
-                    window_area_def.y_start:window_area_def.y_stopstop,
+                    window_area_def.y_start:window_area_def.y_stop,
                     window_area_def.x_start:window_area_def.y_start,
                     :]
     # ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
@@ -151,6 +151,20 @@ def find_cars(
 
 
 if __name__ == "__main__":
+    import pickle
+    import matplotlib.pyplot as plt
+
+    clf = pickle.load("precision-svm.p")
+    hog_scaler = pickle.load("hog-scaler.p")
+    hog_parameters = HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2)
     test_images = glob.glob("test_images/*.jpg")
     for test_file in test_images:
         img = imread(test_file)
+        draw_img = find_cars(
+            img=img,
+            window_area_def=SlidingWindowAreaDefinition(0,1280,0,720,1),
+            clf=clf,
+            X_scaler=hog_scaler, hog_parameters=HogParameters(18,8,2))
+        plt.figure()
+        plt.imshow(draw_img)
+    plt.show(block=True)

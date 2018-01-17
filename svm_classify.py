@@ -21,7 +21,7 @@ def train_svm(train_features, train_labels, test_features, test_labels):
         print("# Tuning hyper-parameters for %s" % score)
         print()
 
-        clf = GridSearchCV(SVC(), tuned_parameters, cv=5,
+        clf = GridSearchCV(SVC(), tuned_parameters, cv=5, n_jobs=4,
                            scoring='%s_macro' % score)
         clf.fit(train_features, train_labels)
 

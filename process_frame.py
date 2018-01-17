@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.ndimage.measurements import label
+import cv2
 
 from search_windows import find_cars, SlidingWindowAreaDefinition
 from heatmap import add_heat, apply_threshold, draw_labeled_bboxes
@@ -12,6 +13,8 @@ def process_frame(frame, clf, norm_scaler, hog_parameters):
     # spatial_size = (32, 32)
     # hist_bins = 64
 
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
+
     bbox_list = []
 
     window_area_def1 = SlidingWindowAreaDefinition(
@@ -22,7 +25,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters):
         scale=1.0
         )
 
-    found_cars = find_cars(frame,
+    found_cars = find_cars(hsv_frame,
                            window_area_def1,
                            clf,
                            norm_scaler,
@@ -36,7 +39,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters):
         y_stop=660,
         scale=1.5
         )
-    found_cars = find_cars(frame,
+    found_cars = find_cars(hsv_frame,
                            window_area_def2,
                            clf,
                            norm_scaler,
@@ -50,7 +53,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters):
         y_stop=656,
         scale=2.0
         )
-    found_cars = find_cars(frame,
+    found_cars = find_cars(hsv_frame,
                            window_area_def3,
                            clf,
                            norm_scaler,
@@ -68,3 +71,26 @@ def process_frame(frame, clf, norm_scaler, hog_parameters):
     result_img = draw_labeled_bboxes(result_img, labels)
 
     return result_img
+
+
+if __name__ == "__main__":
+    import pickle
+    import glob
+    import matplotlib.pyplot as plt
+    from matplotlib.image import imread
+    from calculate_features import HogParameters
+
+    clf = pickle.load("precision-svm.p")
+    hog_scaler = pickle.load("hog-scaler.p")
+    hog_parameters = HogParameters(orientations=18, pixels_per_cell=8, cells_per_block=2)
+    test_images = glob.glob("test_images/*.jpg")
+    for test_file in test_images:
+        img = imread(test_file)
+        draw_img = process_frame(
+            frame=img,
+            clf=clf,
+            norm_scaler=hog_scaler,
+            hog_parameters=HogParameters(18,8,2))
+        plt.figure()
+        plt.imshow(draw_img)
+    plt.show(block=True)

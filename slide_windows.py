@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 def slide_window(
         img,
-        x_start_stop=[None, None],
-        y_start_stop=[None, None],
+        x_start_stop=(None, None),
+        y_start_stop=(None, None),
         xy_window=(64, 64),
         xy_overlap=(0.5, 0.5)):
     """
@@ -59,7 +59,6 @@ def slide_window(
     return window_list
 
 
-# Define a function to draw bounding boxes
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     """
     Draw bounding boxes on an images
@@ -80,27 +79,6 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
 
 
 if __name__ == "__main__":
-    ystart = 380
-    ystop = 550
-    scale = 1.0
-    bbox_list.append(find_cars(img, ystart, ystop, scale, svc, X_scaler,
-                               orient, pix_per_cell, cell_per_block,
-                               spatial_size, hist_bins))
-
-    ystart = 400
-    ystop = 600
-    scale = 1.5
-    bbox_list.append(find_cars(img, ystart, ystop, scale, svc, X_scaler,
-                               orient, pix_per_cell, cell_per_block,
-                               spatial_size, hist_bins))
-
-    ystart = 400
-    ystop = 656
-    scale = 2.0
-    bbox_list.append(find_cars(img, ystart, ystop, scale, svc, X_scaler,
-                               orient, pix_per_cell, cell_per_block,
-                               spatial_size, hist_bins))
-
     image1 = imread('test_images/test3.jpg')
     windows1 = slide_window(image1, x_start_stop=(320, 1024), y_start_stop=(370, 562),
                            xy_window=(64, 64), xy_overlap=(0.5, 0.5))
