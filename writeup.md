@@ -1,3 +1,7 @@
+---
+typora-root-url: ./
+---
+
 ## Writeup
 ---
 
@@ -181,19 +185,19 @@ The pipeline can be found in **process_frame.py**. The same pipeline is executed
       - Set the current "heat" pixel value to the **maximum of its current value and the probability predicted by the SVM classifier**
   - Add the heatmaps from the past 6 frames to the heatmap from the current frame to create a cumulative heatmap
 - Apply a threshold on the cumulative heatmap: all "heat" pixels with pixel value > 5.5 are accepted as pixels belonging to a car
-  ![Heatmap1](D:\Projects\SDC\CarND-Vehicle-Detection\writeup_images\Heatmap1.JPG)
+  ![Heatmap1](/writeup_images/Heatmap1.JPG)
 
-  ![Heatmap2](D:\Projects\SDC\CarND-Vehicle-Detection\writeup_images\Heatmap2.JPG)
+  ![Heatmap2](/writeup_images/Heatmap2.JPG)
 
-  ![Heatmap3](D:\Projects\SDC\CarND-Vehicle-Detection\writeup_images\Heatmap3.JPG)
+  ![Heatmap3](/writeup_images/Heatmap3.JPG)
 
-  ![Heatmap4](D:\Projects\SDC\CarND-Vehicle-Detection\writeup_images\Heatmap4.JPG)
+  ![Heatmap4](/writeup_images/Heatmap4.JPG)
 
-  ![Heatmap5](D:\Projects\SDC\CarND-Vehicle-Detection\writeup_images\Heatmap5.JPG)
+  ![Heatmap5](/writeup_images/Heatmap5.JPG)
 
-  ![Heatmap6](D:\Projects\SDC\CarND-Vehicle-Detection\writeup_images\Heatmap6.JPG)
+  ![Heatmap6](/writeup_images/Heatmap6.JPG)
 
-  ![Heatmap7](D:\Projects\SDC\CarND-Vehicle-Detection\writeup_images\Heatmap7.JPG)
+  ![Heatmap7](/writeup_images/Heatmap7.JPG)
 - Construct a bounding box around all neighbouring pixels with non-zero values in the thresholded cumulative heatmap and label them separately.
 
 
