@@ -11,12 +11,26 @@ from load_samples import get_non_vehicle_data, get_vehicle_data
 
 
 def train_svm(train_features, train_labels):
+    """
+    Train a SVM classifier given the training data
+    :param train_features: Feature vectors of the training data
+    :param train_labels: Labels of the training data
+    :return: A trained SVM classifier
+    """
     clf = SVC(C=10.0, kernel="rbf", gamma=0.0001, probability=True)
     clf.fit(train_features, train_labels)
     return clf
 
 
 def search_svm_parameters(train_features, train_labels, test_features, test_labels):
+    """
+    Perform a grid search on some SVM hyper-paramters
+    :param train_features: Feature vectors of the training data
+    :param train_labels: Labels of the training data
+    :param test_features: Feature vectors of the test data
+    :param test_labels: Labels of the test data
+    :return:
+    """
     tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
                          'C': [1, 10, 100, 1000]},
                         {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
@@ -68,13 +82,14 @@ def prepare_training_data(
     """
     Prepare the HOG data for training/testing the classifier
     :param colour_space: Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-    :param orientations:
-    :param pix_per_cell:
-    :param cell_per_block:
-    :param hog_channel: Can be 0, 1, 2, or "ALL"
-    :param spatial_size:
-    :param hist_bins:
-    :return:
+    :param orientations: Orientation bins for HOG feature extraction
+    :param pix_per_cell: Pixels per cell for HOG feature extraction
+    :param cell_per_block: Cells per block for HOG feature extraction
+    :param hog_channel: Channels to perform HOG feature extraction on. Can be 0, 1, 2, or "ALL"
+    :param spatial_size: Subsampling size for spatial colour data
+    :param hist_bins: Number of colour histogram bins
+    :return: A tuple containing: training feature vectors, training labels, test feature vectors, test labels and
+             the normalization scaler that was used to normalize all the data
     """
     vehicles = get_vehicle_data()
     shuffle(vehicles)
@@ -118,7 +133,7 @@ def grid_search_svc_parameters_with_training_data():
     Grid search of SVM classifier parameters to find a good parameter for the kernel, gamma and C parameters.
     First, an optimization for precision is started and stored in the file "precision-svm.p"
     Second, an optimization for recall is started and stored in the file "recall-svm.p"
-    :return: Nothing. The
+    :return: Nothing.
     """
     x_train, x_test, y_train, y_test, feature_scaler = prepare_training_data(colour_space='HSV')
     clfs = search_svm_parameters(x_train, y_train, x_test, y_test)

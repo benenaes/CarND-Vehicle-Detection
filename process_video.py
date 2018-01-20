@@ -6,6 +6,12 @@ from calculate_features import HogParameters
 
 
 def process_video(input_file, output_file):
+    """
+    Detect cars within an entire MPEG-4 video
+    :param input_file: Original video
+    :param output_file: Video where blue bounding boxes are drawn on detected cars
+    :return:
+    """
     with open('all-features-rbf-svm.p', 'rb') as svm_fd:
         clf = pickle.load(svm_fd)
     with open('all-features-scaler.p', 'rb') as scaler_fd:

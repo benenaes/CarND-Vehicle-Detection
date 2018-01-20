@@ -8,11 +8,19 @@ from find_unique_gti import find_unique_gti
 
 
 def get_kitti_car_images():
+    """
+    Retrieve a list of all car images from the KITTI database
+    :return: A list of all car images from the KITTI database
+    """
     kitti = glob.glob("vehicles/KITTI_extracted/*.png")
     return kitti
 
 
 def get_vehicle_data():
+    """
+    Retrieve a list of all car images from the KITTI and a selected sub-set of the GTI database
+    :return: A list of all car images from the KITTI and a selected sub-set of the GTI database
+    """
     kitti = get_kitti_car_images()
     gti = find_unique_gti()
     vehicles = np.concatenate((kitti, gti))
@@ -20,6 +28,10 @@ def get_vehicle_data():
 
 
 def get_non_vehicle_data():
+    """
+    Retrieve a list of all non-vehicle images from the GTI database
+    :return: A list of all non-vehicle images from the GTI database
+    """
     gti = glob.glob("non-vehicles/GTI/*.png")
     extras = glob.glob("non-vehicles/Extras/*.png")
     total = np.concatenate((gti, extras))

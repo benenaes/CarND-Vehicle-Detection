@@ -53,9 +53,6 @@ def find_unique_gti():
 
 
 if __name__ == "__main__":
-    # unique_cars = find_unique_gti()
-    # print(len(unique_cars))
-    # print('\n'.join(unique_cars))
     orig_car = imread("vehicles/GTI_MiddleClose/image0000.png")
     orig_car = orig_car[16:48,16:48]
     same_car = imread("vehicles/GTI_MiddleClose/image0001.png")

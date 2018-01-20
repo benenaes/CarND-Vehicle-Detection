@@ -13,12 +13,13 @@ def slide_window(
         xy_overlap=(0.5, 0.5)):
     """
     Calculates a list of windows given an image, bounding box, window size and overlap fraction
-    :param img:
-    :param x_start_stop:
-    :param y_start_stop:
-    :param xy_window:
-    :param xy_overlap:
-    :return:
+    :param img: Original image
+    :param x_start_stop: Tuple containing the start and stop positions of the whole sliding window area in the X dimension
+    :param y_start_stop: Tuple containing the start and stop positions of the whole sliding window area in the Y dimension
+    :param xy_window: Tuple containing the size of each sliding window
+    :param xy_overlap: Overlap of each sliding window
+    :return: A list of sliding windows described by a pair of two points: the top left and bottom right corner of the
+             sliding window
     """
     # If x and/or y start/stop positions not defined, set to image size
     if x_start_stop[0] is None:
@@ -60,14 +61,13 @@ def slide_window(
     return window_list
 
 
-def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
+def draw_boxes(img, bboxes, thick=6):
     """
-    Draw bounding boxes on an images
-    :param img:
-    :param bboxes:
-    :param color:
-    :param thick:
-    :return:
+    Draw all sliding windows defined by a given SlidingWindowAreaDefinition instance on a given image
+    :param img: The original image
+    :param bboxes: A list of bounding boxes
+    :param thick: The thickness of the bounding box lines
+    :return: The original image + bounding boxes drawn over it
     """
     # Make a copy of the image
     imcopy = np.copy(img)
@@ -88,6 +88,11 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
 
 
 def draw_sliding_windows_on_test_images(windows):
+    """
+    Draw the sliding windows on a couple of test images
+    :param windows: A list containing window definitions
+    :return: Nothing
+    """
     image1 = imread('test_images/test3.jpg')
     image2 = imread('test_images/test1.jpg')
     image3 = imread('test_images/test5.jpg')

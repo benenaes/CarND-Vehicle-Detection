@@ -11,8 +11,20 @@ heatmap_history = collections.deque(maxlen=6)
 
 
 def process_frame(frame, clf, norm_scaler, hog_parameters, spatial_size, hist_bins):
+    """
+    Process a single frame
+    :param frame: A single image
+    :param clf: A classifier that calculates the probability for each sliding window to be a car or not a car
+    :param norm_scaler: A normalization scaler for each feature vector of a sliding window
+    :param hog_parameters: HOG parameters to be used
+    :param spatial_size: The parameters for the spatial colour binning (a pair containing the sample size in each dimension)
+    :param hist_bins: Number of colour histogram bins
+    :return: The original frame + blue bounding boxes applied where cars are detected
+    """
+    # Convert to the right colour space
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
+    # Construct sliding window area definitions and calculate candidate "car" sliding windows
     boxes = []
 
     window_area_def1 = SlidingWindowAreaDefinition(
@@ -26,7 +38,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters, spatial_size, hist_bi
 
     found_cars = find_cars(hsv_frame,
                            clf=clf,
-                           X_scaler=norm_scaler,
+                           feature_scaler=norm_scaler,
                            window_area_def=window_area_def1,
                            hog_parameters=hog_parameters,
                            spatial_size=spatial_size,
@@ -43,7 +55,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters, spatial_size, hist_bi
         )
     found_cars = find_cars(hsv_frame,
                            clf=clf,
-                           X_scaler=norm_scaler,
+                           feature_scaler=norm_scaler,
                            window_area_def=window_area_def2,
                            hog_parameters=hog_parameters,
                            spatial_size=spatial_size,
@@ -60,7 +72,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters, spatial_size, hist_bi
         )
     found_cars = find_cars(hsv_frame,
                            clf=clf,
-                           X_scaler=norm_scaler,
+                           feature_scaler=norm_scaler,
                            window_area_def=window_area_def3,
                            hog_parameters=hog_parameters,
                            spatial_size=spatial_size,
@@ -77,7 +89,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters, spatial_size, hist_bi
         )
     found_cars = find_cars(hsv_frame,
                            clf=clf,
-                           X_scaler=norm_scaler,
+                           feature_scaler=norm_scaler,
                            window_area_def=window_area_def4,
                            hog_parameters=hog_parameters,
                            spatial_size=spatial_size,
@@ -94,7 +106,7 @@ def process_frame(frame, clf, norm_scaler, hog_parameters, spatial_size, hist_bi
         )
     found_cars = find_cars(hsv_frame,
                            clf=clf,
-                           X_scaler=norm_scaler,
+                           feature_scaler=norm_scaler,
                            window_area_def=window_area_def5,
                            hog_parameters=hog_parameters,
                            spatial_size=spatial_size,
@@ -103,13 +115,17 @@ def process_frame(frame, clf, norm_scaler, hog_parameters, spatial_size, hist_bi
 
     boxes = [item for sublist in boxes for item in sublist]
 
+    # Create a heatmap to prune false detections
     heat = np.zeros_like(frame[:, :, 0]).astype(np.float)
     heat, single_frame_heat = add_heat(heat, boxes, heatmap_history)
     heatmap_history.append(single_frame_heat)
     heat = apply_threshold(heat, 5.5)
 
+    # Label the detections in the heatmaps (based on neighbouring strictly positive numbers)
     labels = label(heat)
     result_img = np.copy(frame)
+
+    # Draw blue bounding boxes around the pixels with the same labels
     result_img = draw_labeled_bboxes(result_img, labels)
 
     return result_img

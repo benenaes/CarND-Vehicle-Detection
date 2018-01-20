@@ -7,6 +7,13 @@ from scipy.ndimage.measurements import label
 
 
 def add_heat(heatmap, bbox_list, heatmap_history):
+    """
+    Make a cumulative heatmap based on the heatmaps from the past frames and the candidate windows containing probabilities
+    :param heatmap: Heatmap initialized with zeroes
+    :param bbox_list: List of candidate windows (BoundingBox instances)
+    :param heatmap_history: (Non-cumulative) heatmaps from the past frames
+    :return: The cumulative heatmap
+    """
     # Iterate through list of bboxes
     for bounding_box in bbox_list:
         box = bounding_box.box
@@ -24,6 +31,12 @@ def add_heat(heatmap, bbox_list, heatmap_history):
 
 
 def apply_threshold(heatmap, threshold):
+    """
+    Apply a threshold on a cumulative heatmap
+    :param heatmap: The cumulative heatmap
+    :param threshold: The threshold to be applied
+    :return: The cumulative heatmap where all values below the given threshold are zeroed out
+    """
     # Zero out pixels below the threshold
     heatmap[heatmap <= threshold] = 0
     # Return thresholded map
@@ -31,6 +44,12 @@ def apply_threshold(heatmap, threshold):
 
 
 def draw_labeled_bboxes(img, labels):
+    """
+    Draw bounding boxes around pixels with the same labels (from the label data) in a given image
+    :param img: The given image
+    :param labels: Array the size of the given image where non-zero labels (positive decimals) are put
+    :return: The given image + bounding boxes (in blue)
+    """
     # Iterate through all detected cars
     for car_number in range(1, labels[1] + 1):
         # Find pixels with each car_number label value
