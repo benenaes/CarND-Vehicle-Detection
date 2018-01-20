@@ -11,12 +11,12 @@ class HogParameters:
         self.cells_per_block = cells_per_block
 
 
-def color_hist(img, nbins=32, bins_range=(0, 1)):
+def color_hist(img, nbins=32, bins_range=(0, 255)):
     """
     Compute color histogram features
-    :param img:
-    :param nbins:
-    :param bins_range:
+    :param img: The image to compute the colour histogram of
+    :param nbins: The number of bins in the colour histogram
+    :param bins_range: The range of the bins
     :return:
     """
     # Compute the histogram of the colour channels separately
@@ -32,10 +32,10 @@ def color_hist(img, nbins=32, bins_range=(0, 1)):
     return hist1, hist2, hist3, bin_centers, hist_features
 
 
-def bin_spatial(img, color_space='RGB', size=(32, 32)):
+def bin_spatial(img, color_space='RGB', size=(16, 16)):
     """
-    Compute color histogram features
-    :param img: The image to compute the color histogram features of
+    Compute spatial binning of colours
+    :param img: The image to compute the spatial colour bins of
     :param color_space: The chosen color space
     :param size: The size to which the image will be resized to construct a color histogram
     :return: A list of spatial color features
@@ -96,10 +96,13 @@ def get_hog_features(
         return features
 
 
-def extract_hog_features(imgs,
-                         colour_space='RGB',
-                         hog_parameters = HogParameters(9,8,2),
-                         hog_channel=0):
+def extract_features(imgs,
+                     colour_space='RGB',
+                     spatial_size=(16, 16),
+                     hist_bins=32,
+                     hog_parameters = HogParameters(9,8,2),
+                     hog_channel='ALL',
+                     spatial_feat=True, hist_feat=True, hog_feat=True):
     """
     Extract HOG features from a list of images
     :param imgs:
@@ -112,8 +115,11 @@ def extract_hog_features(imgs,
     features = []
     # Iterate through the list of images
     for file in imgs:
+        file_features = []
         # Read in each one by one
         image = imread(file)
+        image = image.astype(np.float32) * 255
+        image = image.astype(np.uint8)
         # apply color conversion if other than 'RGB'
         if colour_space != 'RGB':
             if colour_space == 'HSV':
@@ -129,25 +135,32 @@ def extract_hog_features(imgs,
         else:
             feature_image = np.copy(image)
 
-        # Call get_hog_features() with vis=False, feature_vec=True
-        if hog_channel == 'ALL':
-            hog_features = []
-            for channel in range(feature_image.shape[2]):
-                hog_features.append(
-                    get_hog_features(
-                        feature_image[:,:,channel],
-                        hog_parameters=hog_parameters,
-                        vis=False,
-                        feature_vec=True))
-            hog_features = np.ravel(hog_features)
-        else:
-            hog_features = get_hog_features(
-                feature_image[:,:,hog_channel],
-                hog_parameters=hog_parameters,
-                vis=False,
-                feature_vec=True)
-        # Append the new feature vector to the features list
-        features.append(hog_features)
+        if spatial_feat:
+            spatial_features = bin_spatial(feature_image, size=spatial_size)
+            file_features.append(spatial_features)
+        if hist_feat:
+            _, _, _, _, hist_features = color_hist(feature_image, nbins=hist_bins)
+            file_features.append(hist_features)
+        if hog_feat:
+            if hog_channel == 'ALL':
+                hog_features = []
+                for channel in range(feature_image.shape[2]):
+                    hog_features.append(
+                        get_hog_features(
+                            feature_image[:,:,channel],
+                            hog_parameters=hog_parameters,
+                            vis=False,
+                            feature_vec=True))
+                hog_features = np.ravel(hog_features)
+            else:
+                hog_features = get_hog_features(
+                    feature_image[:,:,hog_channel],
+                    hog_parameters=hog_parameters,
+                    vis=False,
+                    feature_vec=True)
+            # Append the new feature vector to the features list
+            file_features.append(hog_features)
+        features.append(np.concatenate(file_features))
     # Return list of feature vectors
     return features
 
@@ -155,7 +168,7 @@ def extract_hog_features(imgs,
 def single_img_features(
         img,
         color_space='RGB',
-        spatial_size=(32, 32),
+        spatial_size=(16, 16),
         hist_bins=32,
         hog_parameters=HogParameters(9,8,2),
         hog_channel=0,
@@ -235,7 +248,7 @@ if __name__ == "__main__":
     axes[3].set_xlim(0.0,1.0)
 
     # Spatial binning of color
-    feature_vec = bin_spatial(image, color_space='RGB', size=(32, 32))
+    feature_vec = bin_spatial(image, color_space='RGB', size=(16, 16))
     fig = plt.figure()
     plt.plot(feature_vec)
     plt.title('Spatially Binned Features')

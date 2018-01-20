@@ -6,11 +6,17 @@ from sklearn.metrics import classification_report
 import numpy as np
 import pickle
 
-from calculate_features import extract_hog_features, HogParameters
+from calculate_features import extract_features, HogParameters
 from load_samples import get_non_vehicle_data, get_vehicle_data
 
 
-def train_svm(train_features, train_labels, test_features, test_labels):
+def train_svm(train_features, train_labels):
+    clf = SVC(C=10.0, kernel="rbf", gamma=0.0001, probability=True)
+    clf.fit(train_features, train_labels)
+    return clf
+
+
+def search_svm_parameters(train_features, train_labels, test_features, test_labels):
     tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
                          'C': [1, 10, 100, 1000]},
                         {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
@@ -51,7 +57,14 @@ def train_svm(train_features, train_labels, test_features, test_labels):
     return clfs
 
 
-def prepare_hog_data(colour_space='HSV', orientations=18, pix_per_cell=8, cell_per_block=2, hog_channel='ALL'):
+def prepare_training_data(
+        colour_space='HSV',
+        orientations=18,
+        pix_per_cell=8,
+        cell_per_block=2,
+        hog_channel='ALL',
+        spatial_size=(16,16),
+        hist_bins=32):
     """
     Prepare the HOG data for training/testing the classifier
     :param colour_space: Can be RGB, HSV, LUV, HLS, YUV, YCrCb
@@ -59,29 +72,35 @@ def prepare_hog_data(colour_space='HSV', orientations=18, pix_per_cell=8, cell_p
     :param pix_per_cell:
     :param cell_per_block:
     :param hog_channel: Can be 0, 1, 2, or "ALL"
+    :param spatial_size:
+    :param hist_bins:
     :return:
     """
     vehicles = get_vehicle_data()
     shuffle(vehicles)
     non_vehicles = get_non_vehicle_data()
     shuffle(non_vehicles)
-    car_features = extract_hog_features(
+    car_features = extract_features(
         imgs=vehicles,
         colour_space=colour_space,
+        spatial_size=spatial_size,
+        hist_bins=hist_bins,
         hog_parameters=HogParameters(orientations=orientations, pixels_per_cell=pix_per_cell, cells_per_block=cell_per_block),
         hog_channel=hog_channel)
-    not_car_features = extract_hog_features(
+    not_car_features = extract_features(
         imgs=non_vehicles,
         colour_space=colour_space,
+        spatial_size=spatial_size,
+        hist_bins=hist_bins,
         hog_parameters=HogParameters(orientations=orientations, pixels_per_cell=pix_per_cell, cells_per_block=cell_per_block),
         hog_channel=hog_channel)
 
     # Create an array stack of feature vectors
-    hog_features = np.vstack((car_features, not_car_features)).astype(np.float64)
+    all_features = np.vstack((car_features, not_car_features)).astype(np.float64)
     # Fit a per-column scaler
-    hog_scaler = StandardScaler().fit(hog_features)
+    feature_scaler = StandardScaler().fit(all_features)
     # Apply the scaler to X
-    scaled_hogs = hog_scaler.transform(hog_features)
+    scaled_features = feature_scaler.transform(all_features)
 
     # Define the labels vector
     y = np.hstack((np.ones(len(car_features)), np.zeros(len(not_car_features))))
@@ -89,17 +108,34 @@ def prepare_hog_data(colour_space='HSV', orientations=18, pix_per_cell=8, cell_p
     # Split up data into randomized training and test sets
     rand_state = np.random.randint(0, 100)
     x_train, x_test, y_train, y_test = train_test_split(
-        scaled_hogs, y, test_size=0.2, random_state=rand_state)
+        scaled_features, y, test_size=0.2, random_state=rand_state)
 
-    return x_train, x_test, y_train, y_test, hog_scaler
+    return x_train, x_test, y_train, y_test, feature_scaler
+
+
+def grid_search_svc_parameters_with_training_data():
+    """
+    Grid search of SVM classifier parameters to find a good parameter for the kernel, gamma and C parameters.
+    First, an optimization for precision is started and stored in the file "precision-svm.p"
+    Second, an optimization for recall is started and stored in the file "recall-svm.p"
+    :return: Nothing. The
+    """
+    x_train, x_test, y_train, y_test, feature_scaler = prepare_training_data(colour_space='HSV')
+    clfs = search_svm_parameters(x_train, y_train, x_test, y_test)
+    print('Test accuracy of precision optimized SVM = ', round(clfs[0].score(x_test, y_test), 4))
+    print('Test accuracy of recall optimized SVM = ', round(clfs[1].score(x_test, y_test), 4))
+    with open('precision-svm.p', 'wb') as pickle_file:
+        pickle.dump(clfs[0], pickle_file)
+    with open('recall-svm.p', 'wb') as pickle_file:
+        pickle.dump(clfs[1], pickle_file)
 
 
 if __name__ == "__main__":
-    x_train, x_test, y_train, y_test, hog_scaler = prepare_hog_data(
+    x_train, x_test, y_train, y_test, feature_scaler = prepare_training_data(
         colour_space='HSV', orientations=18, pix_per_cell=8, cell_per_block=2, hog_channel='ALL')
-    clfs = train_svm(x_train, y_train, x_test, y_test)
-    print('Test Accuracy of precision optimized SVM = ', round(clfs[0].score(x_test, y_test), 4))
-    print('Test Accuracy of recall optimized SVM = ', round(clfs[1].score(x_test, y_test), 4))
-    pickle.dump(clfs[0], "precision-svm.p")
-    pickle.dump(clfs[1], "recall-svm.p")
-    pickle.dump(hog_scaler, "hog-scaler.p")
+    clf = train_svm(x_train, y_train)
+    print('Test Accuracy of SVM = ', round(clf.score(x_test, y_test), 4))
+    with open('all-features-rbf-svm.p', 'wb') as pickle_file:
+        pickle.dump(clf, pickle_file)
+    with open('all-features-scaler.p', 'wb') as pickle_file:
+        pickle.dump(feature_scaler, pickle_file)

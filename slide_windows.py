@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 
 def slide_window(
-        img,
+        img_width,
+        img_height,
         x_start_stop=(None, None),
         y_start_stop=(None, None),
         xy_window=(64, 64),
@@ -23,11 +24,11 @@ def slide_window(
     if x_start_stop[0] is None:
         x_start_stop[0] = 0
     if x_start_stop[1] is None:
-        x_start_stop[1] = img.shape[1]
+        x_start_stop[1] = img_width
     if y_start_stop[0] is None:
         y_start_stop[0] = 0
     if y_start_stop[1] is None:
-        y_start_stop[1] = img.shape[0]
+        y_start_stop[1] = img_height
     # Compute the span of the region to be searched
     xspan = x_start_stop[1] - x_start_stop[0]
     yspan = y_start_stop[1] - y_start_stop[0]
@@ -86,50 +87,71 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     return imcopy
 
 
-if __name__ == "__main__":
+def draw_sliding_windows_on_test_images(windows):
     image1 = imread('test_images/test3.jpg')
-    windows1 = slide_window(image1, x_start_stop=(320, 1024), y_start_stop=(370, 562),
-                           xy_window=(64, 64), xy_overlap=(0.5, 0.5))
-
-    window_img1 = draw_boxes(image1, windows1, color=(0, 0, 255), thick=6)
+    image2 = imread('test_images/test1.jpg')
+    image3 = imread('test_images/test5.jpg')
+    image4 = imread('test_images/test7.jpg')
+    image5 = imread('test_images/test8.jpg')
+    window_img1 = draw_boxes(image1, windows, color=(0, 0, 255), thick=6)
+    window_img2 = draw_boxes(image2, windows, color=(0, 0, 255), thick=6)
+    window_img3 = draw_boxes(image3, windows, color=(0, 0, 255), thick=6)
+    window_img4 = draw_boxes(image4, windows, color=(0, 0, 255), thick=6)
+    window_img5 = draw_boxes(image5, windows, color=(0, 0, 255), thick=6)
 
     plt.figure()
     plt.imshow(window_img1)
-
-    image2 = imread('test_images/test1.jpg')
-    windows2 = slide_window(image2, x_start_stop=(280, 1144), y_start_stop=(390, 582),
-                            xy_window=(96, 96), xy_overlap=(0.5, 0.5))
-
-    window_img2 = draw_boxes(image2, windows2, color=(0, 0, 255), thick=6)
-
     plt.figure()
     plt.imshow(window_img2)
-
-    image3 = imread('test_images/test5.jpg')
-    windows3 = slide_window(image3, x_start_stop=(256, 1280), y_start_stop=(410, 602),
-                            xy_window=(128, 128), xy_overlap=(0.5, 0.5))
-
-    window_img3 = draw_boxes(image3, windows3, color=(0, 0, 255), thick=6)
-
     plt.figure()
     plt.imshow(window_img3)
-
-    image4 = imread('test_images/test5.jpg')
-    windows4 = slide_window(image4, x_start_stop=(944, 1280), y_start_stop=(380, 620),
-                            xy_window=(192, 160), xy_overlap=(0.75, 0.75))
-
-    window_img4 = draw_boxes(image4, windows4, color=(0, 0, 255), thick=6)
-
     plt.figure()
     plt.imshow(window_img4)
-
-    image5 = imread('test_images/close_car.jpg')
-    windows5 = slide_window(image5, x_start_stop=(896, 1280), y_start_stop=(396, 636),
-                            xy_window=(256, 192), xy_overlap=(0.75, 0.75))
-
-    window_img5 = draw_boxes(image5, windows5, color=(0, 0, 255), thick=6)
-
     plt.figure()
     plt.imshow(window_img5)
-
     plt.show(block=True)
+
+
+if __name__ == "__main__":
+    windows1 = slide_window(img_width=1280, img_height=720,
+                            x_start_stop=(550, 1024),
+                            y_start_stop=(370, 498),
+                            xy_window=(64, 64),
+                            xy_overlap=(0.5, 0.5))
+
+    draw_sliding_windows_on_test_images(windows=windows1)
+
+
+    windows2 = slide_window(img_width=1280, img_height=720,
+                            x_start_stop=(530, 1144),
+                            y_start_stop=(390, 534),
+                            xy_window=(96, 96),
+                            xy_overlap=(0.5, 0.5))
+
+    draw_sliding_windows_on_test_images(windows=windows2)
+
+
+    windows3 = slide_window(img_width=1280, img_height=720,
+                            x_start_stop=(480, 1280),
+                            y_start_stop=(400, 592),
+                            xy_window=(128, 128),
+                            xy_overlap=(0.5, 0.5))
+
+    draw_sliding_windows_on_test_images(windows=windows3)
+
+
+    windows4 = slide_window(img_width=1280, img_height=720,
+                            x_start_stop=(944, 1280),
+                            y_start_stop=(380, 620),
+                            xy_window=(192, 160),
+                            xy_overlap=(0.75, 0.75))
+
+    draw_sliding_windows_on_test_images(windows=windows4)
+
+    windows5 = slide_window(img_width=1280, img_height=720,
+                            x_start_stop=(896, 1280),
+                            y_start_stop=(396, 636),
+                            xy_window=(256, 192),
+                            xy_overlap=(0.75, 0.75))
+
+    draw_sliding_windows_on_test_images(windows=windows5)

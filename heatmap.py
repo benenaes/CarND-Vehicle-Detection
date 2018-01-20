@@ -6,15 +6,21 @@ import cv2
 from scipy.ndimage.measurements import label
 
 
-def add_heat(heatmap, bbox_list):
+def add_heat(heatmap, bbox_list, heatmap_history):
     # Iterate through list of bboxes
-    for box in bbox_list:
+    for bounding_box in bbox_list:
+        box = bounding_box.box
         # Add += 1 for all pixels inside each bbox
         # Assuming each "box" takes the form ((x1, y1), (x2, y2))
-        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
+        prob = np.full_like(heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]], bounding_box.probability, dtype=np.float)
+        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] = np.maximum(heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]],
+                                                                prob)
 
+    total_heatmap = heatmap.copy()
+    for idx in range(len(heatmap_history)):
+        total_heatmap = np.add(total_heatmap, heatmap_history[idx])
     # Return updated heatmap
-    return heatmap  # Iterate through list of bboxes
+    return total_heatmap, heatmap
 
 
 def apply_threshold(heatmap, threshold):
